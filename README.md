@@ -4,7 +4,23 @@
 
 Ứng dụng web đặt đồ uống **không dùng tiền mặt**, làm cho đồ án môn Công nghệ Phần mềm (Đại học Sài Gòn, học kỳ I 2026–2027) theo quy trình Agile Scrum. Luồng chính: xem menu → chọn size/topping → giỏ hàng → đăng nhập → thanh toán → xác nhận → lịch sử đơn.
 
-<!-- Thêm ảnh/GIF demo vào docs/images rồi bỏ ghi chú ở đây, ví dụ: ![Menu](docs/images/menu.png) -->
+<!-- Demo trực tuyến (điền sau khi triển khai, xem docs/deploy.md): **Demo:** https://... -->
+
+<!-- Ảnh minh họa: thêm ảnh vào docs/images (xem docs/images/README.md), rồi bỏ dấu chú thích bao quanh khối này
+## Ảnh minh họa
+
+| Menu | Chi tiết | Giỏ hàng |
+|---|---|---|
+| ![Menu](docs/images/menu.png) | ![Chi tiết](docs/images/product-detail.png) | ![Giỏ hàng](docs/images/cart.png) |
+
+| Thanh toán (thẻ) | Ví + OTP | Xác nhận |
+|---|---|---|
+| ![Thẻ](docs/images/payment-card.png) | ![OTP](docs/images/payment-wallet-otp.png) | ![Xác nhận](docs/images/order-confirmation.png) |
+
+| Lịch sử đơn | Quầy pha chế |
+|---|---|
+| ![Lịch sử](docs/images/order-history.png) | ![Quầy](docs/images/staff-board.png) |
+-->
 
 ## Tính năng
 
@@ -137,6 +153,7 @@ cd frontend && npm run build
 | [docs/testing.md](docs/testing.md) | Chiến lược kiểm thử và ma trận truy vết |
 | [docs/demo-script.md](docs/demo-script.md) | Kịch bản demo và lệnh đo thời gian phản hồi |
 | [docs/release-notes.md](docs/release-notes.md) | Tính năng, hạn chế đã biết của v1.0.0 |
+| [docs/deploy.md](docs/deploy.md) | Triển khai bản demo trực tuyến (cơ sở dữ liệu, backend, frontend, biến môi trường) |
 
 ## Ghi chú
 

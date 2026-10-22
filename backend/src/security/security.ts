@@ -23,6 +23,18 @@ export const THROTTLER_OPTIONS: ThrottlerModuleOptions = {
 };
 
 /**
+ * Danh sách địa chỉ giao diện được phép gọi API (CORS). FRONTEND_URL có thể chứa nhiều địa chỉ ngăn cách bằng dấu phẩy,
+ * ví dụ "https://brewlite.vercel.app,http://localhost:3000".
+ */
+export function corsOrigins(value: string | undefined = process.env.FRONTEND_URL): string[] {
+  const origins = (value ?? 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/$/, ''))
+    .filter(Boolean);
+  return origins.length > 0 ? origins : ['http://localhost:3000'];
+}
+
+/**
  * Áp dụng các lớp bảo mật HTTP: header an toàn (helmet) và, khi chạy sau reverse proxy
  * (Render, Nginx...), đặt TRUST_PROXY để lấy đúng địa chỉ IP của người dùng cho việc giới hạn tần suất.
  */

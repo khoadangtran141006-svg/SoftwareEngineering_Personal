@@ -79,7 +79,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-white/35 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 BrewLite. All rights reserved.</p>
+          <p>© 2026 BrewLite · Dự án học tập, thanh toán chỉ mô phỏng và không trừ tiền thật.</p>
 
           <p>Crafted with ☕ for better days.</p>
         </div>

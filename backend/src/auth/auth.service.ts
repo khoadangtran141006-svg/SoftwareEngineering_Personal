@@ -16,6 +16,7 @@ import { User } from '../users/entities/user.entity.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { PasswordResetToken } from './entities/password-reset-token.entity.js';
+import { corsOrigins } from '../security/security.js';
 
 @Injectable()
 export class AuthService {
@@ -140,7 +141,7 @@ export class AuthService {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
     await this.resetTokens.save(this.resetTokens.create({ userId: user.id, tokenHash, expiresAt, usedAt: null }));
 
-    const resetUrl = `${process.env.FRONTEND_URL ?? 'http://localhost:3000'}/reset-password?token=${token}`;
+    const resetUrl = `${corsOrigins()[0]}/reset-password?token=${token}`;
     if (smtpHost) {
       const port = Number(process.env.SMTP_PORT ?? 587);
       const transporter = nodemailer.createTransport({
