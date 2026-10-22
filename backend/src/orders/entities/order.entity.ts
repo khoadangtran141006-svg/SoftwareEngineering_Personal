@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -11,6 +12,9 @@ import type { OrderItem } from './order-item.entity.js';
 import type { User } from '../../users/entities/user.entity.js';
 
 @Entity('orders')
+// Lịch sử đơn của khách (GET /orders/me) và dọn đơn quá hạn lọc theo các cột này.
+@Index(['userId', 'createdAt'])
+@Index(['status', 'createdAt'])
 export class Order {
   @PrimaryGeneratedColumn()
   id!: number;

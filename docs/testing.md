@@ -7,6 +7,8 @@
 | Unit | Vitest | `backend/src/**/*.spec.ts` | Logic thuần: state machine, khuyến mãi, DTO, mock payment, service với phụ thuộc giả |
 | E2E tầng HTTP | Vitest + Supertest | `backend/test/*.e2e-spec.ts` | Controller, validation, guard; service được giả lập |
 | Integration trên **PostgreSQL thật** | Vitest + TypeORM | `backend/test/business.e2e-spec.ts` | Nghiệp vụ Task 10: đồng thời, idempotency, hoàn kho, hết hạn |
+| Lược đồ cơ sở dữ liệu | Vitest + PostgreSQL thật | `backend/test/migrations.e2e-spec.ts` | Migration khớp entity, chạy được trên cơ sở dữ liệu cũ, chạy lặp không lỗi |
+| Bảo mật HTTP | Vitest + Supertest | `backend/test/security.e2e-spec.ts` | Header `helmet`, giới hạn tần suất trả 429 |
 | Hiệu năng | Vitest + PostgreSQL thật; script đo qua HTTP | `backend/test/performance.e2e-spec.ts`, `scripts/measure-latency.mjs` | Kiểm tra yêu cầu phi chức năng p95 < 500 ms |
 | Frontend | Build + `tsc` + kiểm thử thủ công | CI và kịch bản [demo](demo-script.md) | Chưa có test tự động cho giao diện (xem backlog) |
 
@@ -46,7 +48,7 @@ CI (`.github/workflows/ci.yml`) chạy toàn bộ các bước trên với Postg
 | US-05 AC5 Idempotency | `business.e2e-spec` (gửi lần lượt 2 lần, gửi đồng thời 5 request, hai key khác nhau, dùng lại key cho đơn khác); `payments.service.spec` |
 | US-06 Lịch sử đơn | `orders.e2e-spec` (`GET /orders/me` và validate thân yêu cầu tạo đơn); `business.e2e-spec` cho trạng thái đơn sau thanh toán |
 | US-07 Hủy và hết hạn | `business.e2e-spec` (nhóm "Hủy đơn và đơn quá hạn": hủy hoàn kho, không hủy đơn người khác, không hủy đơn PAID, hủy cùng lúc thanh toán, dọn đơn quá hạn, lệch đồng hồ) |
-| US-08 State machine | `order-state.service.spec`, `business.e2e-spec` (chặn chuyển sai, đi hết luồng) |
+| US-08 State machine và quầy pha chế | `order-state.service.spec`, `business.e2e-spec` (chặn chuyển sai, đi hết luồng, danh sách đơn cho barista: đúng trạng thái, đúng thứ tự, không lộ dữ liệu nhạy cảm), `orders.e2e-spec` (khách bị 403, STAFF được 200). Giao diện `/staff` kiểm thử thủ công |
 | US-09 Khuyến mãi, điểm | `promotions.service.spec`, `business.e2e-spec` (BREW10, mã sai không trừ kho, điểm theo số tiền sau giảm) |
 | US-10 Tồn kho đồng thời | `inventory.service.spec` (cập nhật có điều kiện nguyên tử, từ chối khi hết hàng), `business.e2e-spec` (10 đơn cùng lúc khi kho còn 5; rollback khi thất bại) |
 
@@ -61,7 +63,7 @@ Ba tiêu chí chấm của Task 10 trong đề (mục 9):
 | Yêu cầu (mục 4.2 của đề) | Cách kiểm tra |
 |---|---|
 | API phản hồi dưới 500 ms với dữ liệu mẫu | (1) `performance.e2e-spec.ts` tự động: 120 đơn của một khách, p95 của `GET /orders/me`, `POST /orders`, `POST /payments` phải dưới 500 ms. (2) `scripts/measure-latency.mjs` đo toàn bộ API qua HTTP trên hệ thống đang chạy (xem bên dưới) |
-| Mật khẩu băm, JWT, validate đầu vào | `auth.service.spec`, các DTO spec, `auth.e2e-spec` |
+| Mật khẩu băm, JWT, validate đầu vào, giới hạn tần suất | `auth.service.spec`, các DTO spec, `auth.e2e-spec`, `security.e2e-spec` |
 | Chạy trên các trình duyệt web | Kiểm thử thủ công (ghi trình duyệt đã thử ở bảng cuối trang) |
 
 ### Đo thời gian phản hồi bằng script

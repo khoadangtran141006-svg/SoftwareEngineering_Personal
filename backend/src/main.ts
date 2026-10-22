@@ -2,9 +2,12 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module.js';
+import { applySecurity } from './security/security.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  applySecurity(app);
 
   app.enableCors({
     origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',

@@ -47,6 +47,11 @@ export default function ProfilePage() {
               <h2 className="text-lg font-semibold">{"Tài khoản"}</h2>
               <p className="mt-1 text-sm text-[#704329]/65">{user?.name ?? "BrewLite customer"}</p>
               <p className="text-sm text-[#704329]/65">{user?.email ?? ""}</p>
+              {user?.role === "STAFF" && (
+                <Link href="/staff" className="mt-3 inline-flex rounded-full border border-[#704329] px-3 py-1 text-xs font-semibold text-[#704329] transition hover:bg-[#f8f1ea]">
+                  Mở quầy pha chế
+                </Link>
+              )}
               {typeof user?.loyaltyPoints === "number" && (
                 <p className="mt-2 inline-flex rounded-full bg-[#704329] px-3 py-1 text-xs font-semibold text-white">
                   {`${user.loyaltyPoints} điểm thưởng`}

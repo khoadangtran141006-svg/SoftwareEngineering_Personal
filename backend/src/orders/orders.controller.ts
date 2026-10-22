@@ -17,6 +17,13 @@ export class OrdersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('staff')
+  findActiveForStaff(@Req() request: Request & { user: { role: string } }) {
+    this.assertStaff(request);
+    return this.ordersService.findActiveForStaff();
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('me')
   findMine(@Req() request: Request & { user: { id: number } }) {
     return this.ordersService.findMine(request.user.id);
@@ -31,7 +38,11 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
   @Patch(':id/status')
   updateStatus(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateOrderStatusDto, @Req() request: Request & { user: { role: string } }) {
-    if (request.user.role !== 'STAFF') throw new ForbiddenException('Chỉ nhân viên mới được cập nhật trạng thái đơn');
+    this.assertStaff(request);
     return this.ordersService.updateStatus(id, body.status);
+  }
+
+  private assertStaff(request: { user: { role: string } }) {
+    if (request.user.role !== 'STAFF') throw new ForbiddenException('Chỉ nhân viên mới được thực hiện thao tác này');
   }
 }

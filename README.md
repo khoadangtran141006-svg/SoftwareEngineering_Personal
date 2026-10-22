@@ -15,6 +15,8 @@
 - **Máy trạng thái đơn hàng** (PENDING → PAID → PREPARING → READY → COMPLETED, cùng PAYMENT_FAILED và CANCELLED).
 - **Không bán quá tồn kho** khi đặt đồng thời; khách tự hủy đơn chưa thanh toán, đơn quá hạn tự hủy và hoàn kho.
 - Mã khuyến mãi và điểm thưởng.
+- **Trang quầy pha chế** (`/staff`) cho barista: nhận đơn, pha xong, giao khách, hủy; tự làm mới. Khách thấy trạng thái đơn tự cập nhật.
+- Bảo mật: header an toàn (`helmet`), giới hạn tần suất, mật khẩu băm bcrypt, kiểm tra dữ liệu đầu vào ở backend.
 
 ## Kiến trúc
 
@@ -49,6 +51,9 @@ PostgreSQL được lưu trong volume `brewlite-data`. Backend tự áp dụng m
 | `DB_PASSWORD`, `JWT_SECRET` | Bắt buộc, tự đặt giá trị riêng |
 | `NEXT_PUBLIC_API_URL` | Địa chỉ API cho frontend (mặc định `http://localhost:3001`) |
 | `STAFF_EMAIL`, `STAFF_PASSWORD` | Tạo sẵn tài khoản barista để demo (để trống nếu không cần) |
+| `RATE_LIMIT_PER_MINUTE`, `AUTH_RATE_LIMIT_PER_MINUTE` | Giới hạn request mỗi phút cho mỗi IP (mặc định 200 và 10 cho đăng nhập/đăng ký/quên mật khẩu) |
+| `TRUST_PROXY` | Đặt `1` khi chạy sau reverse proxy để giới hạn tần suất dùng đúng IP |
+| `DATABASE_URL`, `DB_SSL` | Kết nối bằng một chuỗi URL (khi không đặt `DB_HOST`) và bật SSL (`DB_SSL=true`) cho PostgreSQL trên máy chủ thật |
 | `ORDER_EXPIRY_MINUTES` | Đơn chưa thanh toán tự hủy sau số phút này (mặc định 15, `0` để tắt) |
 | `SMTP_*` | Gửi email quên mật khẩu; bắt buộc ở production |
 
@@ -71,6 +76,7 @@ Yêu cầu Node.js 22+ và PostgreSQL 16+.
 | `POST /orders` | Tạo đơn (PENDING), giữ chỗ tồn kho | Bearer |
 | `GET /orders/me` | Lịch sử đơn của người dùng | Bearer |
 | `PATCH /orders/:id/cancel` | Khách hủy đơn chưa thanh toán | Bearer |
+| `GET /orders/staff` | Đơn cần pha chế (PAID, PREPARING, READY), cũ nhất trước | Bearer, STAFF |
 | `PATCH /orders/:id/status` | Cập nhật trạng thái đơn | Bearer, STAFF |
 | `POST /payments` | Thanh toán (header `Idempotency-Key`) | Bearer |
 | `GET /promotions/validate?code=&subtotal=` | Xem trước số tiền giảm | Không |
@@ -94,7 +100,19 @@ Yêu cầu Node.js 22+ và PostgreSQL 16+.
 
 Tồn kho bị trừ ngay khi tạo đơn. Khách hủy được đơn PENDING hoặc PAYMENT_FAILED của mình; đơn chưa thanh toán quá `ORDER_EXPIRY_MINUTES` tự hủy và hoàn kho. Đơn đã PAID cần nhân viên xử lý.
 
-Đặt `STAFF_EMAIL` và `STAFF_PASSWORD` trong `.env` để có tài khoản STAFF. Đăng nhập bằng `POST /auth/login`, rồi gọi `PATCH /orders/:id/status` với `{ "status": "PREPARING" }` (lần lượt `PREPARING` → `READY` → `COMPLETED`). Chuyển trạng thái sai bị từ chối với lỗi 400. Lệnh mẫu: [docs/demo-script.md](docs/demo-script.md).
+Đặt `STAFF_EMAIL` và `STAFF_PASSWORD` trong `.env` để có tài khoản STAFF. Đăng nhập tài khoản đó rồi mở `/staff` (hoặc nút "Mở quầy pha chế" ở trang Profile): đơn mới hiện theo ba cột, bấm **Nhận đơn** → **Pha xong** → **Đã giao khách**; nút **Hủy** hoàn lại tồn kho. Danh sách tự làm mới mỗi 10 giây, và trang Lịch sử của khách tự cập nhật trạng thái mỗi 15 giây. Có thể thao tác bằng API: `PATCH /orders/:id/status` (lệnh mẫu trong [docs/demo-script.md](docs/demo-script.md)); chuyển trạng thái sai bị từ chối với lỗi 400.
+
+## Bảo mật
+
+- `helmet` đặt các header bảo mật; API giới hạn tần suất theo IP (mặc định 200 request/phút, và 10 request/phút cho đăng nhập, đăng ký, quên và đặt lại mật khẩu). Vượt giới hạn trả HTTP 429 kèm thông báo tiếng Việt.
+- Mật khẩu băm bcrypt; JWT ký bằng `JWT_SECRET`; `ValidationPipe` bật `whitelist` và `forbidNonWhitelisted`; chỉ STAFF được đổi trạng thái đơn và xem danh sách quầy.
+- Khi triển khai thật: đặt `NODE_ENV=production`, cấu hình SMTP (ở production API quên mật khẩu không trả token trong phản hồi), đặt `FRONTEND_URL` đúng địa chỉ giao diện và `TRUST_PROXY=1` nếu có reverse proxy.
+
+## Cơ sở dữ liệu và migration
+
+- **Prisma** quản lý bảng `products` (migration + seed): `npm run db:migrate`, `npm run db:seed`.
+- **TypeORM** quản lý `users`, `orders`, `order_items`, `payments`, `password_reset_tokens` bằng migration trong `backend/src/database/migrations`, tự chạy khi backend khởi động. Không còn dùng `synchronize`.
+- Khi sửa entity: viết migration mới (thêm lớp vào `TYPEORM_MIGRATIONS` trong `backend/src/database/typeorm.config.ts`). Test `test/migrations.e2e-spec.ts` thất bại và in ra các câu SQL còn thiếu nếu entity và migration lệch nhau.
 
 ## Kiểm thử
 
@@ -122,4 +140,4 @@ cd frontend && npm run build
 
 ## Ghi chú
 
-Backend dùng TypeORM cho tài khoản/đơn/thanh toán và Prisma migration cho bảng sản phẩm (nợ kỹ thuật đã ghi trong backlog). Không đưa `.env`, mật khẩu thật hoặc JWT secret vào Git. Cổng thanh toán là mô phỏng, không trừ tiền thật.
+Backend dùng TypeORM cho tài khoản/đơn/thanh toán và Prisma cho bảng sản phẩm; cả hai đều dùng migration (hai ORM là nợ kỹ thuật đã ghi trong backlog). Không đưa `.env`, mật khẩu thật hoặc JWT secret vào Git. Cổng thanh toán là mô phỏng, không trừ tiền thật.

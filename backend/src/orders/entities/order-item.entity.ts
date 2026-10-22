@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -10,6 +11,7 @@ import type { Product } from '../../products/entities/product.entity.js';
 import type { Order } from './order.entity.js';
 
 @Entity('order_items')
+@Index(['orderId'])
 export class OrderItem {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -41,6 +43,6 @@ export class OrderItem {
   @Column({ type: 'integer' })
   lineTotal!: number;
 
-  @Column({ type: 'jsonb', default: () => "'[]'::jsonb" })
+  @Column({ type: 'jsonb', default: () => "'[]'" })
   toppings!: string[];
 }

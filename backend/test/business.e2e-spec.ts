@@ -307,6 +307,34 @@ describe('Task 10 – nghiệp vụ backend (PostgreSQL thật)', () => {
     });
   });
 
+  describe('Danh sách đơn cho barista', () => {
+    it('chỉ gồm đơn PAID, PREPARING, READY, đơn cũ nhất trước, kèm tên khách và không lộ dữ liệu nhạy cảm', async () => {
+      const first = await newOrder(1);
+      const second = await newOrder(1);
+      const third = await newOrder(1);
+      const pending = await newOrder(1); // chưa thanh toán: không được hiện
+      await pay(first.id, 's-1');
+      await pay(second.id, 's-2');
+      await pay(third.id, 's-3');
+      await orders.updateStatus(second.id, OrderStatus.PREPARING);
+      await orders.updateStatus(third.id, OrderStatus.PREPARING);
+      await orders.updateStatus(third.id, OrderStatus.READY);
+      const done = await newOrder(1);
+      await pay(done.id, 's-4');
+      for (const next of [OrderStatus.PREPARING, OrderStatus.READY, OrderStatus.COMPLETED]) await orders.updateStatus(done.id, next);
+
+      const list = await orders.findActiveForStaff();
+
+      expect(list.map((order) => order.id)).toEqual([first.id, second.id, third.id]);
+      expect(list.map((order) => order.status)).toEqual(['PAID', 'PREPARING', 'READY']);
+      expect(list.map((order) => order.id)).not.toContain(pending.id);
+      expect(list[0].customerName).toBe('Test');
+      expect(list[0].items[0].product.name).toBe('Cà phê sữa');
+      expect(JSON.stringify(list)).not.toContain('passwordHash');
+      expect('user' in list[0]).toBe(false);
+    });
+  });
+
   describe('Khuyến mãi và điểm thưởng', () => {
     it('mã BREW10 giảm 10% và điểm tính theo số tiền sau giảm', async () => {
       const order = await newOrder(2, 'brew10'); // 60.000 → giảm 6.000 → 54.000 → 5 điểm

@@ -29,13 +29,14 @@
 
 ## 3. Điều muốn cải thiện tiếp (Action items)
 
-| Hành động | Mục tiêu |
-|---|---|
-| Thêm giao diện cho barista | Demo được luồng PREPARING → READY → COMPLETED mà không cần gọi API tay |
-| Thống nhất một ORM và dùng migration cho mọi bảng | Giảm nợ kỹ thuật |
-| Thêm giới hạn tần suất và `helmet` | Tăng bảo mật |
-| Thêm kiểm thử tự động cho frontend | Giữ các lỗi giao diện đã sửa không quay lại |
-| Ghi số liệu burndown hằng ngày từ đầu Sprint | Có số liệu thật thay vì tái dựng |
+| Hành động | Mục tiêu | Trạng thái |
+|---|---|---|
+| Thêm giao diện cho barista | Demo được luồng PREPARING → READY → COMPLETED mà không cần gọi API tay | Đã làm (`/staff`) |
+| Dùng migration thay cho `synchronize`, có test chống lệch lược đồ | Tránh tự động đổi cấu trúc bảng khi khởi động | Đã làm |
+| Thêm giới hạn tần suất và `helmet` | Tăng bảo mật | Đã làm |
+| Thống nhất một ORM | Giảm nợ kỹ thuật | Chưa làm (đã ghi vào backlog) |
+| Thêm kiểm thử tự động cho frontend | Giữ các lỗi giao diện đã sửa không quay lại | Chưa làm (đã ghi vào backlog) |
+| Ghi số liệu burndown hằng ngày từ đầu Sprint | Có số liệu thật thay vì tái dựng | Áp dụng cho dự án nhóm |
 
 ## 4. Phản hồi của "khách hàng" (người kiểm thử)
 

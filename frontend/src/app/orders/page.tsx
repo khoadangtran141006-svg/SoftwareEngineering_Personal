@@ -128,10 +128,13 @@ export default function OrdersPage() {
     const token = getToken();
     if (!token) return;
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
-    fetch(`${apiUrl}/orders/me`, { headers: { Authorization: `Bearer ${token}` } })
+    let stopped = false;
+    const load = () => fetch(`${apiUrl}/orders/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then(async (response) => {
         const payload = await response.json();
         if (!response.ok) throw new Error(payload.message ?? "Không thể tải lịch sử đơn hàng");
+        if (stopped) return;
+        setLoadError("");
         setOrders(payload.map((order: { id: number; orderCode: string; status: OrderStatus; total: number; createdAt: string; paymentMethod: string | null; items: Array<{ id: number; quantity: number; size: string; lineTotal: number; toppings: string[]; product: { id: number; name: string; category: string; imageUrl: string } }> }) => ({
           id: order.orderCode,
           dbId: order.id,
@@ -144,6 +147,16 @@ export default function OrdersPage() {
         })));
       })
       .catch((cause: unknown) => setLoadError(cause instanceof Error ? cause.message : "Không thể tải lịch sử"));
+
+    void load();
+    // Tự cập nhật trạng thái đơn (PAID → PREPARING → READY...) mỗi 15 giây khi tab đang hiển thị.
+    const timer = window.setInterval(() => {
+      if (!document.hidden) void load();
+    }, 15000);
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+    };
   }, [setOrders]);
 
   async function cancelOrder(order: Order) {

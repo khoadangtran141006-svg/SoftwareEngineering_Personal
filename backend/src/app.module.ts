@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -12,6 +14,8 @@ import { PaymentsModule } from './payments/payments.module.js';
 import { InventoryModule } from './inventory/inventory.module.js';
 import { PromotionsModule } from './promotions/promotions.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { buildTypeOrmOptions } from './database/typeorm.config.js';
+import { THROTTLER_OPTIONS } from './security/security.js';
 
 @Module({
   imports: [
@@ -22,17 +26,9 @@ import { PrismaModule } from './prisma/prisma.module.js';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DB_HOST'),
-        port: Number(configService.get<string>('DB_PORT', '5432')),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_NAME'),
-        autoLoadEntities: true,
-        synchronize: true,
-      }),
+      useFactory: (configService: ConfigService) => buildTypeOrmOptions(configService),
     }),
+    ThrottlerModule.forRoot(THROTTLER_OPTIONS),
     AuthModule,
     ProductsModule,
     OrdersModule,
@@ -43,6 +39,6 @@ import { PrismaModule } from './prisma/prisma.module.js';
   ],
 
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

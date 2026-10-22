@@ -14,6 +14,7 @@ describe('Orders API (e2e)', () => {
     findMine: vi.fn().mockResolvedValue([]),
     updateStatus: vi.fn(),
     cancelMine: vi.fn().mockResolvedValue({ status: 'CANCELLED' }),
+    findActiveForStaff: vi.fn().mockResolvedValue([{ orderCode: 'BL-1', status: 'PAID' }]),
   };
 
   beforeEach(async () => {
@@ -23,7 +24,8 @@ describe('Orders API (e2e)', () => {
       providers: [{ provide: OrdersService, useValue: orders }],
     }).overrideGuard(JwtAuthGuard).useValue({
       canActivate: (context: any) => {
-        context.switchToHttp().getRequest().user = { id: 7, role: 'CUSTOMER' };
+        const req = context.switchToHttp().getRequest();
+        req.user = { id: 7, role: req.headers['x-test-role'] ?? 'CUSTOMER' };
         return true;
       },
     }).compile();
@@ -42,6 +44,21 @@ describe('Orders API (e2e)', () => {
   it('lets the authenticated customer cancel their own order', async () => {
     await request(app.getHttpServer()).patch('/orders/12/cancel').expect(200);
     expect(orders.cancelMine).toHaveBeenCalledWith(12, 7);
+  });
+
+  it('chỉ cho nhân viên xem danh sách đơn cần pha chế', async () => {
+    await request(app.getHttpServer()).get('/orders/staff').expect(403);
+    expect(orders.findActiveForStaff).not.toHaveBeenCalled();
+
+    const response = await request(app.getHttpServer()).get('/orders/staff').set('x-test-role', 'STAFF').expect(200);
+    expect(response.body).toEqual([{ orderCode: 'BL-1', status: 'PAID' }]);
+  });
+
+  it('khách không đổi được trạng thái đơn, nhân viên thì được', async () => {
+    await request(app.getHttpServer()).patch('/orders/3/status').send({ status: 'PREPARING' }).expect(403);
+    orders.updateStatus.mockResolvedValue({ status: 'PREPARING' });
+    await request(app.getHttpServer()).patch('/orders/3/status').set('x-test-role', 'STAFF').send({ status: 'PREPARING' }).expect(200);
+    expect(orders.updateStatus).toHaveBeenCalledWith(3, 'PREPARING');
   });
 
   it('rejects invalid order bodies and lists account orders', async () => {

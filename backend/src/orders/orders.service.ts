@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Order } from './entities/order.entity.js';
@@ -15,6 +15,9 @@ import { InventoryService } from '../inventory/inventory.service.js';
 import { PromotionsService } from '../promotions/promotions.service.js';
 import { OrderStateService } from './order-state.service.js';
 import { OrderStatus } from './order-status.enum.js';
+
+/** Đơn barista cần xử lý: đã thanh toán và chưa giao khách. */
+const ACTIVE_FOR_STAFF = [OrderStatus.PAID, OrderStatus.PREPARING, OrderStatus.READY];
 
 /** Các trạng thái chưa thanh toán thành công: khách được hủy và hệ thống được tự hết hạn. */
 const CANCELLABLE_BY_CUSTOMER = [OrderStatus.PENDING, OrderStatus.PAYMENT_FAILED];
@@ -112,6 +115,16 @@ export class OrdersService {
       relations: { items: { product: true } },
       order: { createdAt: 'DESC' },
     });
+  }
+
+  /** Danh sách đơn đang cần pha chế cho barista, đơn cũ nhất trước; không trả thông tin nhạy cảm của khách. */
+  async findActiveForStaff() {
+    const orders = await this.orderRepository.find({
+      where: { status: In(ACTIVE_FOR_STAFF) },
+      relations: { items: { product: true }, user: true },
+      order: { createdAt: 'ASC', id: 'ASC' },
+    });
+    return orders.map(({ user, ...order }) => ({ ...order, customerName: user?.name ?? null }));
   }
 
   /** Nhân viên cập nhật trạng thái đơn (theo state machine). */

@@ -55,18 +55,24 @@ Mở `http://localhost:3000`. Backend ở `http://localhost:3001`.
 4. Đơn **đã thanh toán** không có nút Hủy.
 5. (Tùy chọn) đặt `ORDER_EXPIRY_MINUTES=1` trong `.env`, chạy lại, tạo đơn chưa thanh toán rồi chờ khoảng 2 phút: đơn tự hủy và hoàn kho.
 
-## 4. Vai barista (STAFF) qua API
+## 4. Vai barista (STAFF)
 
-Thay email và mật khẩu bằng `STAFF_EMAIL`, `STAFF_PASSWORD` trong `.env`:
+1. Mở cửa sổ ẩn danh (hoặc trình duyệt khác), đăng nhập bằng `STAFF_EMAIL` / `STAFF_PASSWORD`, mở `http://localhost:3000/staff`.
+2. Đơn đã thanh toán ở bước 1 hiện ở cột **Đơn mới**. Bấm **Nhận đơn** → thẻ chuyển sang **Đang pha chế** → **Pha xong** → **Đã giao khách**.
+3. Ở cửa sổ của khách, trang **Lịch sử đơn hàng** tự cập nhật trạng thái trong vòng 15 giây (Đang chuẩn bị → Sẵn sàng nhận → Hoàn thành).
+4. Nút **Hủy** của barista hoàn lại tồn kho.
+
+Bằng API (tùy chọn), thay email và mật khẩu bằng `STAFF_EMAIL`, `STAFF_PASSWORD`:
 
 ```powershell
 $body = @{ email = "staff@brewlite.local"; password = "mat-khau-cua-ban" } | ConvertTo-Json
 $login = Invoke-RestMethod -Method Post -Uri http://localhost:3001/auth/login -ContentType "application/json" -Body $body
 $h = @{ Authorization = "Bearer $($login.accessToken)" }
+Invoke-RestMethod -Uri http://localhost:3001/orders/staff -Headers $h
 Invoke-RestMethod -Method Patch -Uri http://localhost:3001/orders/1/status -Headers $h -ContentType "application/json" -Body '{"status":"PREPARING"}'
 ```
 
-Lần lượt `PREPARING` → `READY` → `COMPLETED` (đơn phải đang PAID). Thử nhảy sai (ví dụ PAID → COMPLETED) sẽ nhận lỗi 400. Trang lịch sử của khách hiển thị trạng thái mới sau khi tải lại.
+Thử nhảy sai (ví dụ PAID → COMPLETED) sẽ nhận lỗi 400; tài khoản khách gọi `/orders/staff` nhận lỗi 403.
 
 ## 5. Đo thời gian phản hồi (yêu cầu < 500 ms)
 

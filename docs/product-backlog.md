@@ -39,7 +39,7 @@ Một hạng mục được coi là xong khi thỏa **tất cả**:
 | US-05 | Thanh toán không tiền mặt | Cao | 6, 8 | Hoàn thành |
 | US-06 | Xem xác nhận đơn và lịch sử đơn | Cao | 9 | Hoàn thành |
 | US-07 | Hủy đơn chưa thanh toán, đơn quá hạn tự hủy | Trung bình | 10 | Hoàn thành |
-| US-08 | Barista cập nhật trạng thái đơn | Trung bình | 10 | Hoàn thành (qua API) |
+| US-08 | Barista cập nhật trạng thái đơn | Trung bình | 10 | Hoàn thành (API và trang `/staff`) |
 | US-09 | Mã khuyến mãi và điểm thưởng | Trung bình | 10 | Hoàn thành |
 | US-10 | Không bán quá tồn kho khi đặt đồng thời | Cao | 10 | Hoàn thành |
 
@@ -91,6 +91,7 @@ Một hạng mục được coi là xong khi thỏa **tất cả**:
 *Là barista, tôi muốn cập nhật trạng thái pha chế.*
 - AC1: Chỉ STAFF được gọi `PATCH /orders/:id/status`.
 - AC2: Luồng hợp lệ PAID → PREPARING → READY → COMPLETED; chuyển trạng thái sai bị từ chối (HTTP 400).
+- AC3: Trang `/staff` chỉ dành cho STAFF, hiển thị đơn PAID/PREPARING/READY (cũ nhất trước, kèm tên khách và món), có nút chuyển trạng thái và hủy, tự làm mới; khách thấy trạng thái đơn tự cập nhật.
 
 ### US-09 – Khuyến mãi và điểm thưởng
 *Là khách hàng, tôi muốn dùng mã giảm giá và tích điểm.*
@@ -106,11 +107,12 @@ Một hạng mục được coi là xong khi thỏa **tất cả**:
 
 | Ý tưởng | Lý do |
 |---|---|
-| Giao diện cho barista (danh sách đơn, đổi trạng thái) | Hiện chỉ thao tác qua API |
 | Xác minh email khi đăng ký | Chỉ chặn được lỗi gõ sai tên miền, chưa biết email có thật |
 | Luồng hoàn tiền khi nhân viên hủy đơn đã PAID | Hiện chỉ đổi trạng thái và hoàn kho |
-| Thống nhất một ORM và dùng migration cho toàn bộ bảng | Hiện trộn TypeORM (`synchronize`) và Prisma |
-| Giới hạn tần suất và `helmet` cho API | Tăng bảo mật |
+| Thống nhất một ORM (chuyển bảng tài khoản/đơn/thanh toán sang Prisma hoặc ngược lại) | Hiện dùng hai ORM, tuy cả hai đã dùng migration |
 | Tích hợp cổng thanh toán thật (sandbox) | Thay Mock Payment Gateway |
-| Cập nhật trạng thái đơn theo thời gian thực | Khách thấy PREPARING/READY không cần tải lại |
-| Kiểm thử tự động cho frontend | Hiện frontend kiểm thử thủ công |
+| Thông báo thời gian thực (WebSocket/SSE) thay cho làm mới định kỳ | Giao diện hiện tải lại mỗi 10–15 giây |
+| Kiểm thử tự động cho frontend (Playwright) | Hiện frontend kiểm thử thủ công |
+| Quản lý sản phẩm và tồn kho cho quản lý cửa hàng | Hiện chỉ có dữ liệu mẫu |
+
+**Đã hoàn thành so với bản đầu của backlog:** giao diện barista, giới hạn tần suất và `helmet`, bỏ `synchronize` để dùng migration.

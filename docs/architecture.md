@@ -142,8 +142,11 @@ Tồn kho bị trừ lúc tạo đơn. Đơn chưa thanh toán được hoàn kh
 ### 5.4 Tính tiền ở server
 Backend tự tính giá theo sản phẩm, size, topping và mã giảm giá; không tin giá do frontend gửi.
 
-### 5.5 Hai ORM
-TypeORM quản lý tài khoản, đơn, thanh toán (hiện bật `synchronize`); Prisma quản lý migration và seed bảng sản phẩm. Đây là nợ kỹ thuật đã ghi trong [product-backlog.md](product-backlog.md) (mục 6).
+### 5.5 Hai ORM và migration
+TypeORM quản lý tài khoản, đơn, thanh toán; Prisma quản lý bảng sản phẩm (migration và seed). **Cả hai đều dùng migration**: backend không còn `synchronize`. Migration TypeORM (`backend/src/database/migrations`) viết theo kiểu idempotent nên chạy an toàn trên cơ sở dữ liệu cũ từng được tạo bằng `synchronize`, và test `migrations.e2e-spec.ts` đảm bảo entity và migration không lệch nhau. Việc dùng hai ORM là nợ kỹ thuật đã ghi trong [product-backlog.md](product-backlog.md).
 
-### 5.6 Bảo mật cơ bản
-Mật khẩu băm bằng bcrypt; JWT có chữ ký từ biến môi trường `JWT_SECRET`; dữ liệu đầu vào được kiểm tra bằng `class-validator` (bật `whitelist` và `forbidNonWhitelisted`); chỉ STAFF được đổi trạng thái đơn; ở production quên mật khẩu bắt buộc cấu hình SMTP.
+### 5.6 Bảo mật
+- Mật khẩu băm bcrypt; JWT ký bằng `JWT_SECRET`; `ValidationPipe` bật `whitelist` và `forbidNonWhitelisted`.
+- `helmet` đặt header bảo mật; `@nestjs/throttler` giới hạn tần suất theo IP (200 request/phút, và 10 request/phút cho các endpoint xác thực để chống dò mật khẩu).
+- Chỉ STAFF được xem danh sách quầy và đổi trạng thái đơn; ở production quên mật khẩu bắt buộc cấu hình SMTP.
+- Chỉ mục cơ sở dữ liệu cho các truy vấn thường dùng: `orders(userId, createdAt)`, `orders(status, createdAt)`, `order_items(orderId)`, `payments(orderId)`.
