@@ -10,5 +10,8 @@ export default defineConfig({
     root: './',
     include: ['**/*.spec.ts'],
     exclude: ['**/*.e2e-spec.ts'],
+    // Máy chậm (Windows, antivirus) có thể cần hơn 10 giây để khởi tạo module Nest lần đầu.
+    hookTimeout: 30000,
+    testTimeout: 30000,
   },
 });

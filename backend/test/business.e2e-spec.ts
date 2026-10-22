@@ -285,6 +285,19 @@ describe('Task 10 – nghiệp vụ backend (PostgreSQL thật)', () => {
       expect(await stockOf()).toBe(5 - 1 - 1); // chỉ còn giữ chỗ cho đơn mới và đơn đã thanh toán
     });
 
+    it('không hủy nhầm đơn mới khi đồng hồ máy chạy ứng dụng lệch so với đồng hồ database', async () => {
+      const fresh = await newOrder(1);
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(Date.now() + 60 * 60_000); // giả lập máy ứng dụng nhanh hơn database 1 giờ
+      try {
+        expect(await orders.expireStaleOrders(15 * 60_000)).toBe(0);
+      } finally {
+        vi.useRealTimers();
+      }
+      expect(await statusOf(fresh.id)).toBe('PENDING');
+      expect(await stockOf()).toBe(4);
+    });
+
     it('dọn đơn quá hạn nhiều lần không hoàn kho hai lần', async () => {
       const stale = await newOrder(3);
       await backdate(stale.id, 30);

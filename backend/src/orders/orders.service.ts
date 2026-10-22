@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource, In, LessThan, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Order } from './entities/order.entity.js';
@@ -134,13 +134,19 @@ export class OrdersService {
    * Hủy các đơn chưa thanh toán đã tạo quá lâu để trả lại tồn kho đã giữ chỗ.
    * Trả về số đơn đã được hủy.
    */
-  async expireStaleOrders(maxAgeMs: number, now = new Date()): Promise<number> {
-    const cutoff = new Date(now.getTime() - maxAgeMs);
-    const stale = await this.orderRepository.find({
-      select: { id: true },
-      where: { status: In(CANCELLABLE_BY_CUSTOMER), createdAt: LessThan(cutoff) },
-      take: 100,
-    });
+  async expireStaleOrders(maxAgeMs: number): Promise<number> {
+    // So sánh bằng đồng hồ của CƠ SỞ DỮ LIỆU (cùng nguồn với cột createdAt), không dùng đồng hồ của máy chạy
+    // backend: hai đồng hồ này có thể lệch nhau (ví dụ Docker Desktop trên Windows) và làm hủy nhầm đơn mới.
+    const stale: Array<{ id: number }> = await this.orderRepository
+      .createQueryBuilder('o')
+      .select('o.id', 'id')
+      .where('o.status IN (:...statuses)', { statuses: CANCELLABLE_BY_CUSTOMER })
+      .andWhere(`o."createdAt" < now() - make_interval(secs => (:seconds)::double precision)`, {
+        seconds: maxAgeMs / 1000,
+      })
+      .orderBy('o.id', 'ASC')
+      .limit(100)
+      .getRawMany();
 
     let expired = 0;
     for (const { id } of stale) {
