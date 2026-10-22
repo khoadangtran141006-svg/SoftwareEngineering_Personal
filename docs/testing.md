@@ -7,6 +7,7 @@
 | Unit | Vitest | `backend/src/**/*.spec.ts` | Logic thuần: state machine, khuyến mãi, DTO, mock payment, service với phụ thuộc giả |
 | E2E tầng HTTP | Vitest + Supertest | `backend/test/*.e2e-spec.ts` | Controller, validation, guard; service được giả lập |
 | Integration trên **PostgreSQL thật** | Vitest + TypeORM | `backend/test/business.e2e-spec.ts` | Nghiệp vụ Task 10: đồng thời, idempotency, hoàn kho, hết hạn |
+| Hiệu năng | Vitest + PostgreSQL thật; script đo qua HTTP | `backend/test/performance.e2e-spec.ts`, `scripts/measure-latency.mjs` | Kiểm tra yêu cầu phi chức năng p95 < 500 ms |
 | Frontend | Build + `tsc` + kiểm thử thủ công | CI và kịch bản [demo](demo-script.md) | Chưa có test tự động cho giao diện (xem backlog) |
 
 ## 2. Chạy kiểm thử
@@ -59,13 +60,34 @@ Ba tiêu chí chấm của Task 10 trong đề (mục 9):
 
 | Yêu cầu (mục 4.2 của đề) | Cách kiểm tra |
 |---|---|
-| API phản hồi dưới 500 ms với dữ liệu mẫu | Chưa có số liệu đo trong repo. Cách đo: xem mục "Đo thời gian phản hồi" trong [demo-script.md](demo-script.md) và ghi kết quả vào mục dưới |
+| API phản hồi dưới 500 ms với dữ liệu mẫu | (1) `performance.e2e-spec.ts` tự động: 120 đơn của một khách, p95 của `GET /orders/me`, `POST /orders`, `POST /payments` phải dưới 500 ms. (2) `scripts/measure-latency.mjs` đo toàn bộ API qua HTTP trên hệ thống đang chạy (xem bên dưới) |
 | Mật khẩu băm, JWT, validate đầu vào | `auth.service.spec`, các DTO spec, `auth.e2e-spec` |
-| Chạy trên các trình duyệt web | Kiểm thử thủ công (ghi trình duyệt đã thử ở dưới) |
+| Chạy trên các trình duyệt web | Kiểm thử thủ công (ghi trình duyệt đã thử ở bảng cuối trang) |
 
-**Kết quả đo thủ công (điền sau khi đo):**
+### Đo thời gian phản hồi bằng script
 
-| Endpoint | Lần 1 | Lần 2 | Lần 3 | Trình duyệt / máy |
-|---|---|---|---|---|
-| `GET /products` | | | | |
-| `POST /orders` | | | | |
+Khởi động hệ thống (`docker compose up`), rồi chạy ở thư mục gốc (Node.js 22+, không cần cài gói):
+
+```bash
+node scripts/measure-latency.mjs --runs 15 --markdown
+# đo thêm các endpoint cần đăng nhập:
+node scripts/measure-latency.mjs --email <email> --password <mật khẩu> --markdown
+```
+
+Script gọi mỗi endpoint 15 lần (bỏ 2 lần khởi động), in min / trung bình / p50 / p95 / max và trả mã thoát 1 nếu có endpoint vượt 500 ms. Với `--markdown`, dán bảng kết quả vào mục bên dưới cùng ngày đo và thông tin máy.
+
+> Script cố ý **không** đo `POST /auth/login` nhiều lần vì API giới hạn tần suất đăng nhập (xem README, mục Bảo mật).
+
+### Kết quả đo hệ thống thật (tự điền)
+
+Ngày đo: ........  Máy / hệ điều hành: ........  Cách chạy: Docker Compose
+
+| Endpoint | min (ms) | trung bình (ms) | p50 (ms) | p95 (ms) | max (ms) | Kết quả |
+|---|---|---|---|---|---|---|
+| | | | | | | |
+
+### Trình duyệt đã thử
+
+| Trình duyệt | Phiên bản | Luồng đặt hàng đầy đủ | Ghi chú |
+|---|---|---|---|
+| | | | |

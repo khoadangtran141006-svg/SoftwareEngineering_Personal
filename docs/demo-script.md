@@ -70,11 +70,12 @@ Lần lượt `PREPARING` → `READY` → `COMPLETED` (đơn phải đang PAID).
 
 ## 5. Đo thời gian phản hồi (yêu cầu < 500 ms)
 
-```powershell
-1..3 | ForEach-Object { (Measure-Command { Invoke-RestMethod http://localhost:3001/products | Out-Null }).TotalMilliseconds }
+```bash
+node scripts/measure-latency.mjs --runs 15 --markdown
+node scripts/measure-latency.mjs --email <email> --password <mật khẩu> --markdown   # thêm endpoint cần đăng nhập
 ```
 
-Ghi kết quả vào bảng trong [testing.md](testing.md).
+Mã thoát 0 nghĩa là mọi endpoint có p95 dưới 500 ms. Dán bảng Markdown vào [testing.md](testing.md).
 
 ## 6. Sprint Retrospective và phản hồi
 

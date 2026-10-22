@@ -105,6 +105,8 @@ cd frontend && npm run build
 
 `test/business.e2e-spec.ts` là integration test chạy trên **PostgreSQL thật** để chứng minh Task 10 (chặn chuyển trạng thái sai, Idempotency-Key kể cả gửi đồng thời, không vượt tồn kho khi đặt đồng thời, hoàn kho, khuyến mãi và điểm thưởng). Test dùng database riêng `brewlite_test` (cấu hình bằng `TEST_DB_*`) và **xóa sạch schema của database đó mỗi lần chạy**. Chi tiết và ma trận truy vết tiêu chí chấp nhận → kiểm thử: [docs/testing.md](docs/testing.md).
 
+**Đo thời gian phản hồi** (yêu cầu < 500 ms): `node scripts/measure-latency.mjs --markdown` khi hệ thống đang chạy; `test/performance.e2e-spec.ts` kiểm tra tự động trên PostgreSQL thật.
+
 ## Tài liệu dự án
 
 | Tài liệu | Nội dung |
