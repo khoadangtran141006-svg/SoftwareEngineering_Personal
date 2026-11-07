@@ -92,4 +92,5 @@ Ngày đo: ........  Máy / hệ điều hành: ........  Cách chạy: Docker C
 
 | Trình duyệt | Phiên bản | Luồng đặt hàng đầy đủ | Ghi chú |
 |---|---|---|---|
-| | | | |
+| Google Chrome | 156.0.8078.80 | Đạt | Đặt hàng, chọn size và topping, thanh toán thẻ và ví, mã BREW10, xác nhận, lịch sử đơn |
+| Microsoft Edge | 156.0.4314.58 | Đạt | Đơn đã thanh toán bằng thẻ, mã BREW10 áp dụng (giảm 10%), hiển thị trong lịch sử đơn |
