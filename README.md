@@ -1,6 +1,6 @@
 # BrewLite
 
-[![CI](https://github.com/khoadangtran141006-svg/Software-Engineering/actions/workflows/ci.yml/badge.svg)](https://github.com/khoadangtran141006-svg/Software-Engineering/actions/workflows/ci.yml)
+[![CI](https://github.com/khoadangtran141006-svg/SoftwareEngineering_Personal/actions/workflows/ci.yml/badge.svg)](https://github.com/khoadangtran141006-svg/SoftwareEngineering_Personal/actions/workflows/ci.yml)
 
 Ứng dụng web đặt đồ uống **không dùng tiền mặt**, làm cho đồ án môn Công nghệ Phần mềm (Đại học Sài Gòn, học kỳ I 2026–2027) theo quy trình Agile Scrum. Luồng chính: xem menu → chọn size/topping → giỏ hàng → đăng nhập → thanh toán → xác nhận → lịch sử đơn.
 
@@ -137,6 +137,22 @@ cd backend && npm test && npm run test:e2e && npm run build
 cd frontend && npm run build
 ```
 
+### Chuẩn bị database kiểm thử
+
+Chạy container PostgreSQL riêng cho test:
+
+```bash
+docker run --name brewlite-test-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=brewlite_test -p 5433:5432 -d postgres:16
+```
+
+Nếu container đã có, khởi động lại bằng docker start brewlite-test-db. Chạy e2e:
+
+```bash
+TEST_DB_PORT=5433 TEST_DB_PASSWORD=postgres JWT_SECRET=test-secret npm run test:e2e
+```
+
+Trên Windows PowerShell, đặt biến bằng $env:TEN_BIEN="gia tri" rồi chạy npm run test:e2e trong cùng cửa sổ. Test dùng database brewlite_test và xóa sạch schema mỗi lần chạy; không dùng database có dữ liệu thật. Xem thêm [docs/testing.md](docs/testing.md).
+
 `test/business.e2e-spec.ts` là integration test chạy trên **PostgreSQL thật** để chứng minh Task 10 (chặn chuyển trạng thái sai, Idempotency-Key kể cả gửi đồng thời, không vượt tồn kho khi đặt đồng thời, hoàn kho, khuyến mãi và điểm thưởng). Test dùng database riêng `brewlite_test` (cấu hình bằng `TEST_DB_*`) và **xóa sạch schema của database đó mỗi lần chạy**. Chi tiết và ma trận truy vết tiêu chí chấp nhận → kiểm thử: [docs/testing.md](docs/testing.md).
 
 **Đo thời gian phản hồi** (yêu cầu < 500 ms): `node scripts/measure-latency.mjs --markdown` khi hệ thống đang chạy; `test/performance.e2e-spec.ts` kiểm tra tự động trên PostgreSQL thật.
@@ -158,5 +174,3 @@ cd frontend && npm run build
 ## Ghi chú
 
 Backend dùng TypeORM cho tài khoản/đơn/thanh toán và Prisma cho bảng sản phẩm; cả hai đều dùng migration (hai ORM là nợ kỹ thuật đã ghi trong backlog). Không đưa `.env`, mật khẩu thật hoặc JWT secret vào Git. Cổng thanh toán là mô phỏng, không trừ tiền thật.
-#   S o f t w a r e - E n g i n e e r i n g - P e r s o n a l -  
- 
