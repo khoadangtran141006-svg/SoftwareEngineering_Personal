@@ -82,11 +82,19 @@ Script gọi mỗi endpoint 15 lần (bỏ 2 lần khởi động), in min / tru
 
 ### Kết quả đo hệ thống thật (tự điền)
 
-Ngày đo: ........  Máy / hệ điều hành: ........  Cách chạy: Docker Compose
+Ngày đo: 08/11/2026  Máy / hệ điều hành: Windows 11 Version 26H2 (Build 26300.9818)  Cách chạy: Docker Compose (máy phát triển). Đo bằng scripts/measure-latency.mjs, 15 lần mỗi endpoint, bỏ 2 lần khởi động.  Máy / hệ điều hành: ........  Cách chạy: Docker Compose
 
 | Endpoint | min (ms) | trung bình (ms) | p50 (ms) | p95 (ms) | max (ms) | Kết quả |
 |---|---|---|---|---|---|---|
-| | | | | | | |
+| `GET /products` | 5.9 | 25.8 | 8.3 | 185.3 | 185.3 | Đạt |
+| `GET /products/1` | 6.7 | 16.1 | 13.5 | 53.4 | 53.4 | Đạt |
+| `GET /promotions/validate` | 2.6 | 3.9 | 3.4 | 7.5 | 7.5 | Đạt |
+| `GET /auth/me` | 5.6 | 7.1 | 7.0 | 9.3 | 9.3 | Đạt |
+| `GET /orders/me` | 7.4 | 9.8 | 9.4 | 12.2 | 12.2 | Đạt |
+| `POST /orders` (đo bằng test tự động) | — | — | — | khoảng 5–9 | — | Đạt |
+| `POST /payments` (đo bằng test tự động) | — | — | — | khoảng 10–14 | — | Đạt |
+
+Ghi chú: `GET /products` có một lần đo p95 cao (185 ms) ở lần đầu sau khi khởi động; các lần khác dưới 15 ms. Cả hai đều dưới ngưỡng 500 ms.
 
 ### Trình duyệt đã thử
 
