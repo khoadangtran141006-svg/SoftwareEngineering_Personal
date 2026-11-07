@@ -23,4 +23,7 @@ export class Product {
 
   @Column({ type: 'integer', default: 0 })
   stock: number;
+
+  @Column({ type: 'integer', default: 0 })
+  version: number;
 }

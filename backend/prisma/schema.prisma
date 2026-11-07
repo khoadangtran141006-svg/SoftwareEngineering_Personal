@@ -13,6 +13,7 @@ model Product {
   price    Int
   imageUrl String @db.Text
   stock    Int    @default(0)
+  version  Int    @default(0)
 
   @@map("products")
 }
