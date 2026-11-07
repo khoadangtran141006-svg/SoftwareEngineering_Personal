@@ -158,3 +158,5 @@ cd frontend && npm run build
 ## Ghi chú
 
 Backend dùng TypeORM cho tài khoản/đơn/thanh toán và Prisma cho bảng sản phẩm; cả hai đều dùng migration (hai ORM là nợ kỹ thuật đã ghi trong backlog). Không đưa `.env`, mật khẩu thật hoặc JWT secret vào Git. Cổng thanh toán là mô phỏng, không trừ tiền thật.
+#   S o f t w a r e - E n g i n e e r i n g - P e r s o n a l -  
+ 
