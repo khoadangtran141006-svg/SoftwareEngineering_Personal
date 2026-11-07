@@ -26,13 +26,13 @@ xychart-beta
 
 Đường thứ nhất là **thực tế** (10, 5, 3, 0); đường thứ hai là **lý tưởng** (10, 6,7, 3,3, 0).
 
-## 2. Mẫu burndown hằng ngày cho Sprint của nhóm
+## 2. Mẫu để nhóm điền
 
-Sprint 2 tuần = 10 ngày làm việc. Ví dụ Sprint 20 điểm thì đường lý tưởng giảm 2 điểm mỗi ngày. Cuối mỗi ngày, điền số điểm còn lại thật vào cột "Thực tế":
+Số liệu dưới đây để trống, không phải số của dự án.
 
 | Ngày làm việc | Lý tưởng | Thực tế |
 |---|---|---|
-| 0 | 20 | 20 |
+| 0 | 20 | |
 | 1 | 18 | |
 | 2 | 16 | |
 | 3 | 14 | |
@@ -44,15 +44,17 @@ Sprint 2 tuần = 10 ngày làm việc. Ví dụ Sprint 20 điểm thì đườn
 | 9 | 2 | |
 | 10 | 0 | |
 
-Sau khi có số liệu, thay vào biểu đồ bên dưới (sửa dãy `line` thứ hai):
-
 ```mermaid
 xychart-beta
-    title "Sprint Burndown (mẫu)"
+    title "Sprint Burndown (mẫu, chưa có số liệu thực tế)"
     x-axis [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     y-axis "Story points còn lại" 0 --> 20
     line [20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0]
-    line [20, 20, 18, 17, 15, 12, 12, 8, 5, 2, 0]
 ```
 
-> Các số của đường thứ hai trong biểu đồ mẫu này chỉ là **ví dụ minh họa**, không phải số liệu của dự án. Hãy thay bằng số thật của nhóm.
+## 3. Nguồn số liệu
+
+- Bản cá nhân không có ghi nhận hằng ngày, nên burndown ở mục 1 là theo mốc giao, không theo ngày.
+- Các mốc lấy từ ngày commit trong Git: 23/09 (Initial commit), 02/10 (Task 1–5), 14/10 (MVP Task 6–10), 17/10 (PR #1, #2), 18/10 (PR #3, #4), 22/10 (tài liệu, hiệu năng).
+- Hai commit ngày 07/11 là đưa repo lên lại, không tính là ngày phát triển.
+- Nhóm cần điền burndown hằng ngày từ số liệu thực tế trong Daily Scrum, không sao chép số từ tài liệu này.
