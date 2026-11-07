@@ -124,14 +124,14 @@ sequenceDiagram
 
 ## 5. Quyết định thiết kế quan trọng
 
-### 5.1 Chống bán quá tồn kho (kiểm soát đồng thời lạc quan)
-Đề yêu cầu "transaction + optimistic locking". BrewLite dùng **cập nhật có điều kiện nguyên tử** trong transaction:
+### 5.1 Chống bán quá tồn kho
+Đề yêu cầu **transaction + optimistic locking**. Trong transaction tạo đơn, backend đọc `stock` và `version` hiện tại của sản phẩm, sau đó cập nhật có điều kiện:
 
 ```sql
-UPDATE products SET stock = stock - :quantity WHERE id = :id AND stock >= :quantity
+UPDATE products SET stock = stock - :quantity, version = version + 1 WHERE id = :id AND version = :version AND stock >= :quantity
 ```
 
-Không giữ khóa trong lúc xử lý; nếu có xung đột thì câu lệnh không cập nhật dòng nào (`affected = 0`) và backend từ chối đơn với thông báo hết hàng. Đây là một dạng kiểm soát đồng thời lạc quan (phát hiện xung đột lúc ghi, không khóa trước) và cho kết quả đúng mà không cần cột `version`. Bằng chứng: test "10 đơn cùng lúc khi kho còn 5 thì đúng 5 đơn thành công" chạy trên PostgreSQL thật.
+Nếu `affected = 0` do version đã thay đổi, backend đọc lại dữ liệu và thử lại tối đa 5 lần, có backoff ngắn giữa các lần thử. Nếu tồn kho không đủ hoặc đã hết lượt thử, backend từ chối đơn với thông báo hết hàng. Khi `release()` hoàn kho, thao tác cũng tăng `version` để giữ version nhất quán. Đây là kiểm soát đồng thời lạc quan đúng yêu cầu transaction + optimistic locking của đề. Bằng chứng gồm unit test cho reserve thành công, retry khi xung đột và hết kho tại `backend/src/inventory/inventory.service.spec.ts`, cùng test "10 đơn cùng lúc khi kho còn 5" trong `backend/test/business.e2e-spec.ts`.
 
 ### 5.2 Khóa đơn khi thanh toán và hủy
 Thanh toán, hủy đơn và dọn đơn quá hạn đều khóa dòng đơn (`FOR UPDATE`) rồi **kiểm tra lại trạng thái dưới khóa**. Nhờ đó hai request song song cùng key, hai key khác nhau cho cùng một đơn, hoặc "hủy cùng lúc thanh toán" đều cho kết quả nhất quán.
@@ -151,7 +151,7 @@ TypeORM quản lý tài khoản, đơn, thanh toán; Prisma quản lý bảng s�
 - Chỉ STAFF được xem danh sách quầy và đổi trạng thái đơn; ở production quên mật khẩu bắt buộc cấu hình SMTP.
 - Chỉ mục cơ sở dữ liệu cho các truy vấn thường dùng: `orders(userId, createdAt)`, `orders(status, createdAt)`, `order_items(orderId)`, `payments(orderId)`.
 
-## 5. Luồng nghiệp vụ: từ chọn sản phẩm đến thanh toán
+## 6. Luồng nghiệp vụ: từ chọn sản phẩm đến thanh toán
 
 ```mermaid
 flowchart TD
