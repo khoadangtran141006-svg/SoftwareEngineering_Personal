@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 
 export default function ResetPasswordPage() {
-  const [token, setToken] = useState("");
+  return <Suspense fallback={<main className="min-h-screen bg-[#f3e9de]" />}><ResetPasswordContent /></Suspense>;
+}
 
-  useEffect(() => {
-    setToken(new URLSearchParams(window.location.search).get("token") ?? "");
-  }, []);
+function ResetPasswordContent() {
+  const token = useSearchParams().get("token") ?? "";
 
   return (
     <main className="min-h-screen bg-[#f3e9de] p-4 sm:p-8">

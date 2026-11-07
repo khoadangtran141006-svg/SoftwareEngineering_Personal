@@ -64,12 +64,15 @@ export default function StaffPage() {
 
   useEffect(() => {
     if (user?.role !== "STAFF") return;
-    void load();
+    const initialLoad = window.setTimeout(() => void load(), 0);
     // Làm mới danh sách mỗi 10 giây khi tab đang hiển thị.
     const timer = window.setInterval(() => {
       if (!document.hidden) void load();
     }, 10000);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearTimeout(initialLoad);
+      window.clearInterval(timer);
+    };
   }, [user, load]);
 
   async function changeStatus(order: StaffOrder, status: "PREPARING" | "READY" | "COMPLETED" | "CANCELLED") {

@@ -16,11 +16,10 @@ export default function ProfilePage() {
       router.replace("/login?next=/profile");
       return;
     }
-    setUser(getCurrentUser());
-    setLoading(false);
     // Lấy dữ liệu mới nhất (điểm thưởng) từ backend.
     fetchMe().then((me) => {
-      if (me) setUser(me);
+      setUser(me ?? getCurrentUser());
+      setLoading(false);
     });
   }, [router]);
 

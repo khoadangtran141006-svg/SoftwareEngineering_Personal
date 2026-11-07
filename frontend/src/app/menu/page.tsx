@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   ChevronRight,
   Heart,
@@ -199,7 +200,7 @@ export default function MenuPage() {
             {search.trim() && suggestions.length > 0 && (
               <div className="absolute left-0 right-0 top-full mt-2 overflow-hidden rounded-2xl border border-[#eadfd5] bg-white shadow-[0_20px_50px_rgba(63,36,23,0.12)]">
                 <div className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#b86f38]">
-                  Gợi ý cho "{search}"
+                  Gợi ý cho &quot;{search}&quot;
                 </div>
 
                 {suggestions.map((product) => (
@@ -228,7 +229,7 @@ export default function MenuPage() {
 
             {search.trim() && suggestions.length === 0 && (
               <div className="absolute left-0 right-0 top-full mt-2 rounded-2xl border border-[#eadfd5] bg-white px-5 py-4 text-sm text-[#704329]/65 shadow-[0_20px_50px_rgba(63,36,23,0.12)]">
-                Không tìm thấy sản phẩm phù hợp với "{search}".
+                Không tìm thấy sản phẩm phù hợp với &quot;{search}&quot;.
               </div>
             )}
 
@@ -338,10 +339,12 @@ export default function MenuPage() {
               >
                 {/* IMAGE */}
                 <div className="relative aspect-[4/3] overflow-hidden bg-[#f1e7dc]">
-                  <img
+                  <Image
                     src={product.image}
                     alt={product.name}
-                    className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                    fill
+                    sizes="(max-width: 768px) 90vw, 33vw"
+                    className="object-cover transition duration-700 group-hover:scale-105"
                   />
 
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-60" />

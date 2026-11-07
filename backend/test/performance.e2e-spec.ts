@@ -88,7 +88,7 @@ describe('Hiệu năng (PostgreSQL thật, dữ liệu mẫu)', () => {
   }, 120_000);
 
   afterAll(async () => {
-    await ds?.destroy();
+    if (ds?.isInitialized) await ds.destroy();
   });
 
   it(`GET /orders/me (120 đơn, mỗi đơn 2 dòng hàng): p95 dưới ${LIMIT_MS} ms`, async () => {

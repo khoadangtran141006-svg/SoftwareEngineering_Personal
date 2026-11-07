@@ -40,8 +40,10 @@ function OrderSuccessContent() {
   useEffect(() => {
     const token = getToken();
     if (!token || !orderCode) {
-      setError("Không tìm thấy thông tin đơn hàng. Hãy đăng nhập để xem lịch sử đơn.");
-      setLoading(false);
+      queueMicrotask(() => {
+        setError("Không tìm thấy thông tin đơn hàng. Hãy đăng nhập để xem lịch sử đơn.");
+        setLoading(false);
+      });
       return;
     }
 

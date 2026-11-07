@@ -2,15 +2,21 @@
 
 import Link from "next/link";
 import { ArrowLeft, Eye, EyeOff, LockKeyhole } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import { signIn } from "@/services/auth";
 import { EMAIL_PATTERN } from "@/lib/email";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 const PASSWORD_MIN_LENGTH = 8;
 
 export default function LoginPage() {
+  return <Suspense fallback={<main className="h-dvh bg-[#f3e9de]" />}><LoginContent /></Suspense>;
+}
+
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -18,13 +24,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [registeredNotice, setRegisteredNotice] = useState("");
-
-  useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("registered") === "1") {
-      setRegisteredNotice("\u0110\u0103ng k\u00fd th\u00e0nh c\u00f4ng. H\u00e3y \u0111\u0103ng nh\u1eadp b\u1eb1ng t\u00e0i kho\u1ea3n v\u1eeba t\u1ea1o.");
-    }
-  }, []);
+  const registeredNotice = searchParams.get("registered") === "1"
+    ? "Đăng ký thành công. Hãy đăng nhập bằng tài khoản vừa tạo."
+    : "";
 
   function validateEmail(value: string) {
     const message = !value.trim()

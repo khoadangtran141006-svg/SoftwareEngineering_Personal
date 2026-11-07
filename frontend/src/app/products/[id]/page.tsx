@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { use, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -374,12 +375,14 @@ export default function ProductDetailPage({
           ================================================== */}
           <div className="lg:sticky lg:top-8">
             <div className="overflow-hidden rounded-[32px] border border-[#eadfd5] bg-white shadow-[0_18px_55px_rgba(63,36,23,0.08)]">
-              <div className="aspect-square overflow-hidden bg-[#f3e9de]">
-                <img
+              <div className="relative aspect-square overflow-hidden bg-[#f3e9de]">
+                <Image
                   data-product-hero-image
                   src={product.imageUrl}
                   alt={product.name}
-                  className="h-full w-full object-cover"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
                 />
               </div>
             </div>

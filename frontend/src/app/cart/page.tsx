@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowLeft,
   Check,
@@ -89,7 +90,8 @@ export default function CartPage() {
   function handleUndoRemove() {
     if (!removedItem) return;
 
-    const { cartKey: _cartKey, ...item } = removedItem;
+    const { cartKey, ...item } = removedItem;
+    void cartKey;
 
     addItem(item);
     setRemovedItem(null);
@@ -223,11 +225,13 @@ export default function CartPage() {
                     <div className="p-4 sm:p-5">
                       <div className="flex gap-4 sm:gap-5">
                         {/* PRODUCT IMAGE */}
-                        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-[#f1e7dc] sm:h-32 sm:w-32">
-                          <img
+                        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-[#f1e7dc] sm:h-32 sm:w-32">
+                          <Image
                             src={item.image}
                             alt={item.name}
-                            className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                            fill
+                            sizes="(max-width: 640px) 96px, 128px"
+                            className="object-cover transition-transform duration-500 hover:scale-105"
                           />
                         </div>
 

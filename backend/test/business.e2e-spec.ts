@@ -96,7 +96,7 @@ describe('Task 10 – nghiệp vụ backend (PostgreSQL thật)', () => {
   });
 
   afterAll(async () => {
-    await ds?.destroy();
+    if (ds?.isInitialized) await ds.destroy();
   });
 
   beforeEach(async () => {

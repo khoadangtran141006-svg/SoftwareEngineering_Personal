@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
@@ -120,18 +121,7 @@ export default function PaymentPage() {
     setPromoMessage("");
   }
 
-  /*
-   * MOCK PAYMENT FLOW
-   *
-   * Hiện tại frontend chỉ mô phỏng quá trình thanh toán.
-   * Sau này sẽ thay bằng:
-   *
-   * POST /orders
-   * POST /payments
-   *
-   * và xử lý trạng thái PAID / PAYMENT_FAILED
-   * ở backend.
-   */
+  // Tạo đơn PENDING rồi gọi mock payment gateway qua API backend.
   async function handlePayment() {
     if (cartItems.length === 0 || isProcessing) return;
     if (!getToken()) {
@@ -359,11 +349,13 @@ export default function PaymentPage() {
                   <div className="p-4 sm:p-5">
                     <div className="flex gap-4 sm:gap-5">
                       {/* IMAGE */}
-                      <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-[#f1e7dc] sm:h-28 sm:w-28">
-                        <img
+                      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-[#f1e7dc] sm:h-28 sm:w-28">
+                        <Image
                           src={item.image}
                           alt={item.name}
-                          className="h-full w-full object-cover"
+                          fill
+                          sizes="(max-width: 640px) 96px, 112px"
+                          className="object-cover"
                         />
                       </div>
 
