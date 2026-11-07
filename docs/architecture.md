@@ -150,3 +150,28 @@ TypeORM quản lý tài khoản, đơn, thanh toán; Prisma quản lý bảng s�
 - `helmet` đặt header bảo mật; `@nestjs/throttler` giới hạn tần suất theo IP (200 request/phút, và 10 request/phút cho các endpoint xác thực để chống dò mật khẩu).
 - Chỉ STAFF được xem danh sách quầy và đổi trạng thái đơn; ở production quên mật khẩu bắt buộc cấu hình SMTP.
 - Chỉ mục cơ sở dữ liệu cho các truy vấn thường dùng: `orders(userId, createdAt)`, `orders(status, createdAt)`, `order_items(orderId)`, `payments(orderId)`.
+
+## 5. Luồng nghiệp vụ: từ chọn sản phẩm đến thanh toán
+
+```mermaid
+flowchart TD
+  A["Mở app"] --> B["Xem menu"]
+  B --> C["Chọn sản phẩm: size, topping"]
+  C --> D["Thêm vào giỏ hàng"]
+  D --> E["Xem giỏ và tổng tiền"]
+  E --> F["Đăng nhập nếu chưa"]
+  F --> G["Thanh toán không tiền mặt: Ví / Thẻ / QR"]
+  G --> H["Đơn ở trạng thái PAID"]
+  H --> I["Xác nhận đơn: mã đơn"]
+  I --> J["Nhận đồ uống"]
+
+  E --> K["Thêm sản phẩm khác"]
+  K --> B
+
+  G --> L["Thanh toán lỗi"]
+  L --> M["Đơn ở trạng thái PAYMENT_FAILED"]
+  M -->|Thử lại| G
+  M -->|Hủy đơn| N["Đơn ở trạng thái CANCELLED"]
+```
+
+Nếu thanh toán thất bại, đơn chuyển sang `PAYMENT_FAILED`; khách có thể thử thanh toán lại hoặc hủy đơn. Khi hủy đơn chưa thanh toán, hệ thống chuyển đơn sang `CANCELLED` và hoàn lại số lượng đã giữ trong kho.
